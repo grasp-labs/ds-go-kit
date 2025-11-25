@@ -7,6 +7,8 @@ import (
 
 	"ds-go-kit/internal/fakes"
 	"ds-go-kit/x/log"
+
+	"github.com/google/uuid"
 )
 
 func TestInfoLogger(t *testing.T) {
@@ -58,6 +60,24 @@ func TestErrorLogger(t *testing.T) {
 
 	if !strings.Contains(out, "hello world") {
 		t.Errorf("missing message")
+	}
+}
+
+func TestStackErrorLogger(t *testing.T) {
+	out := fakes.CaptureLogs(func() {
+		c := fakes.Ctx{}
+		ctx := c.New()
+		id := uuid.New()
+		err := fakes.Caller(id)
+		log.StackError(ctx, "error %v with id %s", err, id)
+	})
+
+	if !strings.Contains(out, "[ERROR]") {
+		t.Errorf("expected ERROR prefix, got: %s", out)
+	}
+
+	if !strings.Contains(out, "runtime/debug.Stack()") {
+		t.Errorf("missing message, got START\n%s\nEND", out)
 	}
 }
 

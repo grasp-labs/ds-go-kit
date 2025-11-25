@@ -47,10 +47,10 @@ func Error(c context.Context, format string, args ...any) {
 	log.Printf("%s %s", buildLogPrefix("ERROR", c), fmt.Sprintf(format, args...))
 }
 
-func ErrorWithStack(c context.Context, format string, args ...any) {
+func StackError(c context.Context, format string, args ...any) {
 	msg := fmt.Sprintf(format, args...)
 	stack := debug.Stack()
-	log.Printf("%s %s\nSTACK:\n%s", buildLogPrefix("ERROR", c), msg, stack)
+	log.Printf("%s %s\n%s", buildLogPrefix("ERROR", c), msg, stack)
 }
 
 // Log Prefix
