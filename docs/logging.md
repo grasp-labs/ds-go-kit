@@ -17,7 +17,7 @@ log.Info(ctx, "upload ok")
 log.Error(ctx, "failed: %v", err)
 ```
 
-For prefixed logging with full error thrace, call
+For prefixed logging with full error trace, call
 
 ```bash
 log.StackError(ctx, "Message")
@@ -27,7 +27,6 @@ Example response (Mac OS)
 
 ```bash
 2025/11/25 09:29:57 [ERROR][c166e250-dea0-431c-9d23-4156bf318afc][00000000-0000-0000-0000-000000000000][super@user.com][log_test.go:72] error New err with id: 5b92ec60-0a6e-4323-9bd1-ec5464a825d3 with id 5b92ec60-0a6e-4323-9bd1-ec5464a825d3
-STACK:
 goroutine 11 [running]:
 runtime/debug.Stack()
         /opt/homebrew/Cellar/go/1.25.1/libexec/src/runtime/debug/stack.go:26 +0x64
