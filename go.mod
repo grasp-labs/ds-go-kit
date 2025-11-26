@@ -1,4 +1,4 @@
-module ds-go-kit
+module github.com/grasp-labs/ds-go-kit
 
 go 1.25.0
 

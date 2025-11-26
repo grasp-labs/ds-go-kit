@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"ds-go-kit/internal/fakes"
-	"ds-go-kit/x/log"
+	"github.com/grasp-labs/ds-go-kit/internal/fakes"
+	"github.com/grasp-labs/ds-go-kit/x/log"
 
 	"github.com/google/uuid"
 )
