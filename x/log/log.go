@@ -40,21 +40,21 @@ func (Logger) StackError(ctx context.Context, format string, args ...any) {
 }
 
 func Info(c context.Context, format string, args ...any) {
-	log.Printf("%s %s", buildLogPrefix("INFO", c, 2), fmt.Sprintf(format, args...))
+	log.Printf("%s %s", buildLogPrefix("INFO", c), fmt.Sprintf(format, args...))
 }
 
 func Warning(c context.Context, format string, args ...any) {
-	log.Printf("%s %s", buildLogPrefix("WARN", c, 2), fmt.Sprintf(format, args...))
+	log.Printf("%s %s", buildLogPrefix("WARN", c), fmt.Sprintf(format, args...))
 }
 
 func Error(c context.Context, format string, args ...any) {
-	log.Printf("%s %s", buildLogPrefix("ERROR", c, 2), fmt.Sprintf(format, args...))
+	log.Printf("%s %s", buildLogPrefix("ERROR", c), fmt.Sprintf(format, args...))
 }
 
 func StackError(c context.Context, format string, args ...any) {
 	msg := fmt.Sprintf(format, args...)
 	stack := debug.Stack()
-	log.Printf("%s %s\n%s", buildLogPrefix("ERROR", c, 3), msg, stack)
+	log.Printf("%s %s\n%s", buildLogPrefix("ERROR", c), msg, stack)
 }
 
 // Log Prefix
@@ -63,7 +63,7 @@ func StackError(c context.Context, format string, args ...any) {
 // is made as part of creating the `info`, `warning` and `error` log statements.
 // User Context allows log lines to be tagged and then searchable on a user and
 // tenant level.
-func buildLogPrefix(level string, ctx context.Context, callerDepth int) string {
+func buildLogPrefix(level string, ctx context.Context) string {
 	//var tenantIdStr, userId string
 	// Parse (or generate) request ID set by RequestID middleware
 	requestIDStr := requestctx.GetRequestID(ctx)
@@ -77,7 +77,7 @@ func buildLogPrefix(level string, ctx context.Context, callerDepth int) string {
 		userCtx = defaultContext
 	}
 
-	_, file, line, ok := runtime.Caller(callerDepth)
+	_, file, line, ok := runtime.Caller(2)
 	caller := "unknown"
 	if ok {
 		caller = fmt.Sprintf("%s:%d", filepath.Base(file), line)
