@@ -91,3 +91,16 @@ func TestLoggerHandlesNilContext(t *testing.T) {
 		log.Info(context.Background(), "ok")
 	})
 }
+
+func TestStackErrorCallerDepth(t *testing.T) {
+	var c fakes.Ctx
+	out := fakes.CaptureLogs(func() {
+		ctx := c.New()
+		log.StackError(ctx, "depth test")
+	})
+	t.Log("Captured log output:\n" + out)
+	file := "[log_test.go:99]" // line above where we call the StackError method
+	if !strings.Contains(out, file) {
+		t.Errorf("expected log output to contain caller info with file name, got: %s", out)
+	}
+}

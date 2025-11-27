@@ -35,6 +35,10 @@ func (Logger) Error(ctx context.Context, format string, args ...any) {
 	Error(ctx, format, args...)
 }
 
+func (Logger) StackError(ctx context.Context, format string, args ...any) {
+	StackError(ctx, format, args...)
+}
+
 func Info(c context.Context, format string, args ...any) {
 	log.Printf("%s %s", buildLogPrefix("INFO", c), fmt.Sprintf(format, args...))
 }
