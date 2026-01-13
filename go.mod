@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/grasp-labs/ds-go-echo-middleware/v2 v2.0.0-alpha.1
+	github.com/grasp-labs/ds-go-echo-middleware/v2 v2.0.0-alpha.2
 )
 
 require (
