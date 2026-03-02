@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/grasp-labs/ds-go-echo-middleware/v2 v2.0.0-alpha.1
+	github.com/grasp-labs/ds-go-echo-middleware/v2 v2.0.0
 )
 
 require (
@@ -13,5 +13,5 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 )
