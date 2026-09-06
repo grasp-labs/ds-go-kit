@@ -21,53 +21,72 @@ var defaultContext = &claims.Context{
 	Sub: "unknown",
 }
 
+// Logger is the interfaces.Logger implementation handed to the shared
+// middleware chain.
 type Logger struct{}
 
 func (Logger) Info(ctx context.Context, format string, args ...any) {
-	Info(ctx, format, args...)
+	logAt("INFO", ctx, false, format, args...)
 }
 
 func (Logger) Warning(ctx context.Context, format string, args ...any) {
-	Warning(ctx, format, args...)
+	logAt("WARN", ctx, false, format, args...)
 }
 
 func (Logger) Error(ctx context.Context, format string, args ...any) {
-	Error(ctx, format, args...)
+	logAt("ERROR", ctx, false, format, args...)
 }
 
 func (Logger) StackError(ctx context.Context, format string, args ...any) {
-	StackError(ctx, format, args...)
+	logAt("ERROR", ctx, true, format, args...)
 }
 
 func Info(c context.Context, format string, args ...any) {
-	log.Printf("%s %s", buildLogPrefix("INFO", c), fmt.Sprintf(format, args...))
+	logAt("INFO", c, false, format, args...)
 }
 
 func Warning(c context.Context, format string, args ...any) {
-	log.Printf("%s %s", buildLogPrefix("WARN", c), fmt.Sprintf(format, args...))
+	logAt("WARN", c, false, format, args...)
 }
 
 func Error(c context.Context, format string, args ...any) {
-	log.Printf("%s %s", buildLogPrefix("ERROR", c), fmt.Sprintf(format, args...))
+	logAt("ERROR", c, false, format, args...)
 }
 
+// StackError logs at ERROR and appends the goroutine's stack. Use it where the
+// caller location alone is not actionable — notably from shared helpers, whose
+// own line is identical for every failure routed through them.
 func StackError(c context.Context, format string, args ...any) {
-	msg := fmt.Sprintf(format, args...)
-	stack := debug.Stack()
-	log.Printf("%s %s\n%s", buildLogPrefix("ERROR", c), msg, stack)
+	logAt("ERROR", c, true, format, args...)
 }
 
-// Log Prefix
-//
-// To generate userContext aware log statement a call to `buildLogPrefix`
-// is made as part of creating the `info`, `warning` and `error` log statements.
-// User Context allows log lines to be tagged and then searchable on a user and
-// tenant level.
-func buildLogPrefix(level string, ctx context.Context) string {
-	//var tenantIdStr, userId string
-	// Parse (or generate) request ID set by RequestID middleware
-	requestIDStr := requestctx.GetRequestID(ctx)
-	requestID, err := uuid.Parse(requestIDStr)
+// logAt is the single emit path for every exported entry point above. The
+// caller is resolved here so the frame arithmetic lives in one place: each
+// exported function sits exactly one frame above this one. Every entry point
+// must therefore call logAt directly and never route through another exported
+// logging function, or the reported location shifts onto this file.
+func logAt(level string, ctx context.Context, withStack bool, format string, args ...any) {
+	// Frames: 0 = logAt, 1 = the exported wrapper, 2 = the code being logged.
+	caller := "unknown"
+	if _, file, line, ok := runtime.Caller(2); ok {
+		caller = fmt.Sprintf("%s:%d", filepath.Base(file), line)
+	}
+
+	msg := fmt.Sprintf(format, args...)
+	prefix := buildLogPrefix(level, caller, ctx)
+
+	if withStack {
+		log.Printf("%s %s\n%s", prefix, msg, debug.Stack())
+		return
+	}
+	log.Printf("%s %s", prefix, msg)
+}
+
+// buildLogPrefix tags a line with the request ID, tenant ID, subject and caller
+// so logs are searchable on a user and tenant level.
+func buildLogPrefix(level, caller string, ctx context.Context) string {
+	// Parse (or generate) request ID set by the RequestID middleware.
+	requestID, err := uuid.Parse(requestctx.GetRequestID(ctx))
 	if err != nil {
 		requestID = uuid.New()
 	}
@@ -75,12 +94,6 @@ func buildLogPrefix(level string, ctx context.Context) string {
 	userCtx := requestctx.GetUserContext(ctx)
 	if userCtx == nil {
 		userCtx = defaultContext
-	}
-
-	_, file, line, ok := runtime.Caller(2)
-	caller := "unknown"
-	if ok {
-		caller = fmt.Sprintf("%s:%d", filepath.Base(file), line)
 	}
 
 	tenantID, err := userCtx.GetTenantId()
